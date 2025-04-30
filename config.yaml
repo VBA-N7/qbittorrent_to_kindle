@@ -1,0 +1,26 @@
+supported_formats:
+  - PDF
+  - DOC
+  - DOCX
+  - TXT
+  - RTF
+  - HTM
+  - HTML
+  - PNG
+  - GIF
+  - JPG
+  - JPEG
+  - BMP
+  - EPUB
+
+calibre_ingest_folder: "/path/to/calibre/ingest"
+
+kindle_emails:
+  user1: "user1@kindle.com"
+  user2: "user2@kindle.com"
+
+smtp:
+  server: "smtp.example.com"
+  port: 587
+  email: "your.email@example.com"
+  password: "your_smtp_password"
