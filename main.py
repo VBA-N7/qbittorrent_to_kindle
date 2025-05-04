@@ -81,6 +81,7 @@ def main() -> None:
     parser.add_argument('--name', '-N', required=True, help="Name of the torrent")
     parser.add_argument('--labels', '-G', required=True, help="Comma-separated labels")
     parser.add_argument('--file', '-F', required=True, help="Path to the torrent content")
+    parser.add_argument('--rm', '-R', action='store_true', help="Remove the ebook file after processing", default=False)
     args = parser.parse_args()
 
     torrent_name: str = args.name
@@ -94,13 +95,28 @@ def main() -> None:
         logging.error(f"Unsupported file format for: {torrent_path}")
         return
 
-    for label in torrent_labels:
-        if label == 'Add to Calibre':
-            shutil.move(str(torrent_path), config.calibre_ingest_folder)
-        elif label.startswith('Send to'):
-            kindle_email = config.kindle_emails.get(label.split(' ')[-1])
-            if kindle_email:
-                send_to_kindle(torrent_path, kindle_email, config.smtp)
+    try:
+
+        for label in torrent_labels:
+            if label == 'Add to Calibre':
+                shutil.copy2(torrent_path, config.calibre_ingest_folder)
+            elif label.startswith('Send to'):
+                kindle_email = config.kindle_emails.get(label.split(' ')[-1])
+                if kindle_email:
+                    send_to_kindle(torrent_path, kindle_email, config.smtp)
+    except Exception as e:
+        logging.exception(f"Error processing torrent: {torrent_name}")
+        raise e
+    else:
+        logging.info(f"Successfully processed torrent: {torrent_name}")
+        if args.rm:
+            try:
+                torrent_path.unlink(missing_ok=True)
+                logging.info(f"Removed file: {torrent_path}")
+            except Exception as e:
+                logging.error(f"Failed to remove file: {torrent_path} - {e}")
+
+    logging.info(f"Processed torrent: {torrent_name} with labels: {torrent_labels}")
 
 if __name__ == '__main__':
     main()
